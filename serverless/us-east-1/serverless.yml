@@ -1,0 +1,37 @@
+service: starter
+
+useDotenv: true
+
+provider:
+  name: aws
+  deploymentMethod: direct
+  runtime: nodejs18.x
+  stage: '${opt:stage}'
+  region: 'us-east-1'
+  iam:
+    role: DefaultLambdaRole
+
+plugins:
+  - serverless-webpack
+
+functions: ${file(./serverless/us-east-1/resources/functions.yml)}
+
+resources:
+  - ${file(./serverless/us-east-1/resources/iam-role.yml)}
+
+package:
+  individually: true
+  includeModules: true
+  patterns:
+    - '!appsync/**'
+    - '!node_modules/**'
+    - '!resources/**'
+    - '!__tests__/**'
+    - '!.git/**'
+    - '!tmp/**'
+
+custom:
+  awsResourcePrefix: ${env:AWS_RESOURCE_PRIFIX}-useast1-
+  webpack:
+    includeModules: true
+    packager: 'npm'

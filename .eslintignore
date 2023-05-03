@@ -1,0 +1,5 @@
+.gitignore
+.serverless
+__tests__/
+node_modules/**/*
+webpack.config.js

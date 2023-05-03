@@ -1,0 +1,2 @@
+dynamodbIncidentSnsArn: 'DynamodbIncidentTopic' # SNSARN setting for DynamoDB failure notification destination
+email: ${env:INCIDENT_ALARM_EMAIL_ADDRESS} # Specify email address for failure notification

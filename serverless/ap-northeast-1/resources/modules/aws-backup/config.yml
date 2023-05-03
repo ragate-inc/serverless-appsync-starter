@@ -1,0 +1,11 @@
+backupplan:
+  monthly:
+    planname: 'Daily'
+    # scheduleExpression: 'cron(0 17 1 * ? *)' Once a month
+    # scheduleExpression: 'cron(0 17 1/7 * ? *)' Once a week
+    scheduleexpression: 'cron(0 17 * * ? *)' # Once a day
+    deleteafterdays: 90 # Backup retention period
+tag:
+  dynamodb:
+    Key: backup
+    Value: dynamodb

@@ -1,0 +1,13 @@
+# package directories
+node_modules
+jspm_packages
+
+# Serverless directories
+.serverless
+
+# Other
+package-lock.json
+/serverless.yml
+.env
+yarn-error.log
+__tests__/test-report.html

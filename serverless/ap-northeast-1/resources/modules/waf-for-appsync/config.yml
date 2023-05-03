@@ -1,0 +1,5 @@
+wafIpWhiteList:
+  dev:
+    - 'your ip address here'
+  prd:
+    - 'your ip address here'

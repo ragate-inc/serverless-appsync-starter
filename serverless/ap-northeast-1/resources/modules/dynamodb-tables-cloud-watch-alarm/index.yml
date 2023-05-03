@@ -1,0 +1,80 @@
+Resources:
+  DynamodbIncidentSnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: '${self:custom.modules.dynamodbTablesCloudWatchAlarm.dynamodbIncidentSnsArn}'
+      DisplayName: '${self:custom.modules.dynamodbTablesCloudWatchAlarm.dynamodbIncidentSnsArn}'
+      # If you have a specific destination for notifications, comment out the following to specify the destination
+      Subscription:
+        - Endpoint: '${self:custom.modules.dynamodbTablesCloudWatchAlarm.email}'
+          Protocol: email
+
+  ### CloudWatch Alarm
+  ## Need to create for each table
+  ## https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/creating-alarms.html
+
+  # Alarm to notify when loading capacity exceeds 80%.
+  DynamoDBReadCapacityUnitsLimitAlarmForUserDynamoTable:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: ReadCapacityUnitsLimitAlarmUserDynamoTable
+      AlarmDescription: Alarm when read capacity reaches 80% of my provisioned read capacity
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref DynamodbIncidentSnsTopic
+      MetricName: ConsumedReadCapacityUnits
+      Namespace: AWS/DynamoDB
+      Statistic: Sum
+      Dimensions:
+        - Name: TableName
+          Value: !Ref UserDynamoTable
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 240
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+
+  # Alarm to notify when throughput quota is exceeded
+  DynamoDBRequestsExceedingThroughputAlarmForUserDynamoTable:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: RequestsExceedingThroughputAlarmUserDynamoTable
+      AlarmDescription: Alarm when my requests are exceeding provisioned throughput quotas of a table
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref DynamodbIncidentSnsTopic
+      MetricName: ThrottledRequests
+      Namespace: AWS/DynamoDB
+      Statistic: Sum
+      Dimensions:
+        - Name: TableName
+          Value: !Ref UserDynamoTable
+        - Name: Operation
+          Value: PutItem
+      Period: 300
+      Unit: Count
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+
+  # Alarms to notify system errors
+  DynamoDBSystemErrorsAlarmForUserDynamoTable:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: SystemErrorsAlarmUserDynamoTable
+      AlarmDescription: Alarm when system errors occur
+      ActionsEnabled: true
+      Namespace: AWS/DynamoDB
+      AlarmActions:
+        - !Ref DynamodbIncidentSnsTopic
+      MetricName: SystemErrors
+      Statistic: Sum
+      Dimensions:
+        - Name: TableName
+          Value: !Ref UserDynamoTable
+        - Name: Operation
+          Value: PutItem
+      Period: 60
+      Unit: Count
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold

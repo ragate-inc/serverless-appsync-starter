@@ -1,0 +1,20 @@
+{
+  "extends": "@tsconfig/node-lts/tsconfig.json",
+  "compilerOptions": {
+    "preserveConstEnums": true,
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "exceptions/*": ["./src/exceptions/*"],
+      "services/*": ["./src/services/*"],
+      "functions/*": ["./src/functions/*"],
+      "utils/*": ["./src/utils/*"],
+      "types/*": ["./src/@types"]
+    }
+  }
+}

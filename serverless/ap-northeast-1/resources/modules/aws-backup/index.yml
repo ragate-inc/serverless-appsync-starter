@@ -1,0 +1,38 @@
+Resources:
+  # Backup vault for destination
+  DynamoDBBackupVault:
+    Type: AWS::Backup::BackupVault
+    Properties:
+      BackupVaultName: DynamoDB
+
+  # Backup Rules
+  DynamoDBBackupPlan:
+    Type: AWS::Backup::BackupPlan
+    Properties:
+      BackupPlan:
+        BackupPlanName: PlanDynamoDB
+        BackupPlanRule:
+          - RuleName: '${self:custom.modules.awsBackup.backupplan.monthly.planname}'
+            # Retention period (days)
+            Lifecycle:
+              DeleteAfterDays: '${self:custom.modules.awsBackup.backupplan.monthly.deleteafterdays}'
+            # Backup start time
+            # For a week : cron(0 16 1/7 * ? *)
+            ScheduleExpression: '${self:custom.modules.awsBackup.backupplan.monthly.scheduleexpression}'
+            StartWindowMinutes: 60 # Start within specified number of minutes (minimum 60)
+            CompletionWindowMinutes: 120 # Completed within the specified number of minutes (minimum 120)
+            # Backup vault at storage location
+            TargetBackupVault: !Ref DynamoDBBackupVault
+
+  # Specify the tables to be backed up.
+  DynamoDBBackupSelection:
+    Type: AWS::Backup::BackupSelection
+    Properties:
+      BackupPlanId: !Ref DynamoDBBackupPlan
+      BackupSelection:
+        SelectionName: !Ref DynamoDBBackupVault
+        IamRoleArn: !Sub 'arn:aws:iam::${AWS::AccountId}:role/service-role/AWSBackupDefaultServiceRole'
+        ListOfTags:
+          - ConditionType: STRINGEQUALS
+            ConditionKey: '${self:custom.modules.awsBackup.tag.dynamodb.Key}'
+            ConditionValue: '${self:custom.modules.awsBackup.tag.dynamodb.Value}'

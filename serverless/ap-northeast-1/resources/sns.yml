@@ -1,0 +1,6 @@
+Resources:
+  ErrorNotifySnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: '${self:custom.sns.lambdaErrorNotifyTopicName}'
+      Subscription: '${self:custom.sns.errorNotifySubscriptions}'

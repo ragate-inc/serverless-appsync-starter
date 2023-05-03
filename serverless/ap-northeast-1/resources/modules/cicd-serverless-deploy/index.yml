@@ -1,0 +1,169 @@
+Resources:
+  ServerlessDeployCodeStar:
+    Type: 'AWS::CodeStarConnections::Connection'
+    Properties:
+      ConnectionName: ServerlessDeployConnection
+      ProviderType: '${self:custom.modules.serverlessdeploy.providertype,""}'
+
+  ServerlessDeployCodePipelineServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ${self:custom.awsResourcePrefix}ServerlessDeployCodePipelineServiceRole
+      Policies:
+        - PolicyName: ${self:custom.awsResourcePrefix}ServerlessDeployCodePipelineServiceRolePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
+                  - s3:PutObject
+                Resource:
+                  - arn:aws:s3:::codepipeline*
+                Effect: Allow
+              - Action:
+                  - codecommit:CancelUploadArchive
+                  - codecommit:GetBranch
+                  - codecommit:GetCommit
+                  - codecommit:GetUploadArchiveStatus
+                  - codecommit:UploadArchive
+                Resource:
+                  - '*'
+                Effect: Allow
+              - Action:
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
+                Resource:
+                  - '*'
+                Effect: Allow
+              - Action:
+                  - codedeploy:CreateDeployment
+                  - codedeploy:GetApplication
+                  - codedeploy:GetApplicationRevision
+                  - codedeploy:GetDeployment
+                  - codedeploy:GetDeploymentConfig
+                  - codedeploy:RegisterApplicationRevision
+                Resource:
+                  - '*'
+                Effect: Allow
+              - Action:
+                  - codestar-connections:UseConnection
+                Resource:
+                  - '*'
+                Effect: Allow
+              - Action:
+                  - s3:*
+                Resource:
+                  - '*'
+                Effect: Allow
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+            Action:
+              - sts:AssumeRole
+
+  ServerlessDeployCodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ${self:custom.awsResourcePrefix}ServerlessDeployCodeBuildServiceRole
+      Path: /service-role/
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess-Amplify
+        - arn:aws:iam::aws:policy/AmazonEventBridgeFullAccess
+        - arn:aws:iam::aws:policy/AWSAppSyncAdministrator
+        - arn:aws:iam::aws:policy/AWSCloudFormationFullAccess
+        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRoleForCloudFormation
+        - arn:aws:iam::aws:policy/AWSLambda_FullAccess
+        - arn:aws:iam::aws:policy/CloudWatchFullAccess
+        - arn:aws:iam::aws:policy/AWSBackupFullAccess
+        - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
+
+  ServerlessDeployCodePipelineProject:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: ${self:custom.awsResourcePrefix}ServerlessDeployCodePipeline
+      RoleArn: !GetAtt ServerlessDeployCodePipelineServiceRole.Arn
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: SourceAction
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeStarSourceConnection
+                Version: '1'
+              OutputArtifacts:
+                - Name: SourceArtifact
+              Configuration:
+                BranchName: '${self:custom.modules.serverlessdeploy.branchname,""}'
+                ConnectionArn: !Ref ServerlessDeployCodeStar
+                FullRepositoryId: '${self:custom.modules.serverlessdeploy.repositoryname,""}'
+                OutputArtifactFormat: CODE_ZIP
+              RunOrder: 1
+        - Name: Build
+          Actions:
+            - Name: BuildAction
+              InputArtifacts:
+                - Name: SourceArtifact
+              OutputArtifacts:
+                - Name: BuildArtifact
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref ServerlessDeployCodeBuildProject
+              RunOrder: 2
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ServerlessDeployCodePipeLineArtifactsBucket
+
+  ServerlessDeployCodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: ${self:custom.awsResourcePrefix}ServerlessDeployCodeBuild
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:5.0 # https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-available.html
+        PrivilegedMode: true
+        Type: LINUX_CONTAINER
+        EnvironmentVariables:
+          - Name: DEPLOY_ENV
+            Value: ${self:provider.stage}
+      ServiceRole: !GetAtt ServerlessDeployCodeBuildServiceRole.Arn
+
+  ServerlessDeployCodePipeLineArtifactsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ${self:custom.awsResourcePrefix}${self:provider.stage}-serverless-deploy-codepipeline-artifacts
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteRule
+            Status: Enabled
+            ExpirationInDays: 7
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true

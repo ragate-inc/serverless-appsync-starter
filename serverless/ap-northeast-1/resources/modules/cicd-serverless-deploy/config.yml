@@ -1,0 +1,3 @@
+providertype: ${env:SERVERLESS_DEPLOY_PROVIDER_TYPE}
+branchname: ${env:SERVERLESS_DEPLOY_BRANCH_NAME}
+repositoryname: ${env:SERVERLESS_DEPLOY_REPOZITORY_NAME}

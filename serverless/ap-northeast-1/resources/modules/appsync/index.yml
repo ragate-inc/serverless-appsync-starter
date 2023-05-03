@@ -1,0 +1,66 @@
+Resources:
+  AppSyncLoggingServiceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Path: '/'
+      RoleName: '${self:custom.awsResourcePrefix}AppSyncLoggingServiceRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSAppSyncPushToCloudWatchLogs'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'appsync.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+
+  AppSyncDynamoDBServiceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: '${self:custom.awsResourcePrefix}AppSyncDynamoRole'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'appsync.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: '${self:custom.awsResourcePrefix}AppSyncDynamoPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'dynamodb:*'
+                Resource:
+                  - 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.awsResourcePrefix}*' # Circular dependency between resourcesエラーのためARN文字列を生成し指定(!GetAttが使用できない)
+
+  AppSyncLambdaServiceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: '${self:custom.awsResourcePrefix}AppSyncLambdaRole'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'appsync.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: '${self:custom.awsResourcePrefix}AppSyncLambdaPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'lambda:invokeFunction'
+                Resource:
+                  - 'arn:aws:lambda:${self:provider.region}:*:function:${self:custom.awsResourcePrefix}*'
+                  - 'arn:aws:lambda:${self:provider.region}:*:function:${self:custom.awsResourcePrefix}*:*'

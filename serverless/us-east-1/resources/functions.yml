@@ -1,0 +1,5 @@
+BasicAuth:
+  handler: 'src/functions/events/lambdaedge/basicAuth.handler'
+  name: '${self:custom.awsResourcePrefix}BasicAuth'
+  memorySize: 128
+  timeout: 5
