@@ -2,9 +2,8 @@
 
 # Contents
 
-- [Quick Start](#quickstart)
 - [Docs](#docs)
-- [Contributing](#contributing)
+- [Contact Us](#contactus)
 - [Licensing](#licensing)
 
 # <a name="docs"></a> Docs
