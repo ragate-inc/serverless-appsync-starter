@@ -1,4 +1,3 @@
-import logger from 'utils/logger';
 import _ from 'lodash';
 import { AWSSDKError } from 'exceptions/index';
 import * as LibDynamodb from '@aws-sdk/lib-dynamodb';
