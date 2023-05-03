@@ -2,6 +2,12 @@
 
 This section describes the regulations for the implementation of unit tests for this project.
 
+# How to Unit Testing
+
+```bash
+yarn test
+```
+
 # Unit test regulations
 
 ## Tests must be able to be completed without starting the local environment.
