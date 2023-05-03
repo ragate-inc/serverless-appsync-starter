@@ -14,7 +14,7 @@
       "services/*": ["./src/services/*"],
       "functions/*": ["./src/functions/*"],
       "utils/*": ["./src/utils/*"],
-      "types/*": ["./src/@types"]
+      "types/*": ["./src/types/*"]
     }
   }
 }
