@@ -6,7 +6,7 @@ import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
 import { IncomingMessage } from 'http';
 import _ from 'lodash';
 import getFieldName from 'services/openSearchService/mappings';
-import { AgreementError } from 'exceptions/index';
+import { ArgumentError } from 'exceptions/index';
 import { AWS_REGION } from 'types/index';
 
 export enum OPENSEARCH_INDEX_NAME {
@@ -41,7 +41,7 @@ export default class {
     const { opt, indexName } = args;
     const { REGION, OS_DOMAIN_ENDPOINT } = process.env;
     if (_.isEmpty(REGION)) {
-      throw new AgreementError(
+      throw new ArgumentError(
         `Environment variable "REGION" or argument is not set \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -53,7 +53,7 @@ export default class {
       );
     }
     if (_.isEmpty(OS_DOMAIN_ENDPOINT)) {
-      throw new AgreementError(
+      throw new ArgumentError(
         `The environment variable "OS_DOMAIN_ENDPOINT" or argument is not set \n ${JSON.stringify(
           {
             ...(args || {}),

@@ -1,5 +1,5 @@
 import logger from 'utils/logger';
-import { AgreementError, AWSSDKError, DynamoDBAlreadyExistsError } from 'exceptions/index';
+import { ArgumentError, AWSSDKError, DynamoDBAlreadyExistsError } from 'exceptions/index';
 import _ from 'lodash';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import * as LibDynamodb from '@aws-sdk/lib-dynamodb';
@@ -21,7 +21,7 @@ export default class {
     this._region = (args?.region || process.env.REGION) as AWS_REGION;
     this._prefix = ((args?.tablePrefix || process.env.AWS_RESOURCE_PRIFIX) as AWS_REGION) || '';
     if (_.isEmpty(this._region)) {
-      throw new AgreementError(
+      throw new ArgumentError(
         `Environment variable "REGION" or argument is not set \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -60,7 +60,7 @@ export default class {
   public getItem = async (args: { getItemCommandInput: LibDynamodb.GetCommandInput }): Promise<LibDynamodb.GetCommandOutput> => {
     logger.info('dynamoService.getItem', args.getItemCommandInput);
     if (_.isEmpty(args.getItemCommandInput.TableName)) {
-      throw new AgreementError(
+      throw new ArgumentError(
         `Argument "args.getItemCommandInput.TableName" , is unset \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -101,7 +101,7 @@ export default class {
   public query = async (args: { queryCommandInput: LibDynamodb.QueryCommandInput & { NextToken?: string } }): Promise<LibDynamodb.QueryCommandOutput & { NextToken?: string }> => {
     logger.info('dynamoService.query', args.queryCommandInput);
     if (_.isEmpty(args.queryCommandInput.TableName)) {
-      throw new AgreementError(
+      throw new ArgumentError(
         `Argument "args.queryCommandInput.TableName" , is unset. \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -162,7 +162,7 @@ export default class {
   public scan = async (args: { scanCommandInput: LibDynamodb.ScanCommandInput & { NextToken?: string } }): Promise<LibDynamodb.ScanCommandOutput & { NextToken?: string }> => {
     logger.info('dynamoService.scan', args);
     if (_.isEmpty(args.scanCommandInput.TableName)) {
-      throw new AgreementError(
+      throw new ArgumentError(
         `Argument "args.scanCommandInput.TableName" , is unset. \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -223,7 +223,7 @@ export default class {
   public deleteItem = async (args: { deleteItemCommandInput: LibDynamodb.DeleteCommandInput }): Promise<LibDynamodb.DeleteCommandOutput> => {
     logger.info('dynamoService.deleteItem', args.deleteItemCommandInput);
     if (_.isEmpty(args.deleteItemCommandInput.TableName)) {
-      throw new AgreementError(
+      throw new ArgumentError(
         `Argument "args.deleteItemCommandInput.TableName" , is unset \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -264,7 +264,7 @@ export default class {
   public putItem = async (args: { putItemCommandInput: LibDynamodb.PutCommandInput }): Promise<LibDynamodb.PutCommandOutput> => {
     logger.info('dynamoService.putItem', args);
     if (_.isEmpty(args.putItemCommandInput.TableName)) {
-      throw new AgreementError(
+      throw new ArgumentError(
         `Argument "args.putItemCommandInput.TableName" , is unset \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -407,7 +407,7 @@ export default class {
             const k = key as 'Put' | 'Delete' | 'Update' | 'ConditionCheck';
             const tableName = v[k]?.TableName;
             if (_.isEmpty(tableName)) {
-              throw new AgreementError(`TableName is required \n ${JSON.stringify(args, null, 2)}`);
+              throw new ArgumentError(`TableName is required \n ${JSON.stringify(args, null, 2)}`);
             }
             result[k] = _.chain(v[k])
               .cloneDeep()
@@ -423,10 +423,10 @@ export default class {
                 } else if (k === 'Update') {
                   const v = item as LibDynamodb.UpdateCommandInput;
                   const expressionAttributeNames = v.ExpressionAttributeNames;
-                  if (_.isEmpty(expressionAttributeNames)) throw new AgreementError(`ExpressionAttributeNames is required \n ${JSON.stringify(args, null, 2)}`);
+                  if (_.isEmpty(expressionAttributeNames)) throw new ArgumentError(`ExpressionAttributeNames is required \n ${JSON.stringify(args, null, 2)}`);
                   const expressionAttributeValues = v.ExpressionAttributeValues;
-                  if (_.isEmpty(expressionAttributeValues)) throw new AgreementError(`ExpressionAttributeValues is required \n ${JSON.stringify(args, null, 2)}`);
-                  if (_.isEmpty(v.UpdateExpression)) throw new AgreementError(`UpdateExpression is required \n ${JSON.stringify(args, null, 2)}`);
+                  if (_.isEmpty(expressionAttributeValues)) throw new ArgumentError(`ExpressionAttributeValues is required \n ${JSON.stringify(args, null, 2)}`);
+                  if (_.isEmpty(v.UpdateExpression)) throw new ArgumentError(`UpdateExpression is required \n ${JSON.stringify(args, null, 2)}`);
                   if (!_hasValueInObject(expressionAttributeNames, 'UpdatedAt')) {
                     expressionAttributeNames['#UpdatedAt'] = 'UpdatedAt';
                     expressionAttributeValues[':UpdatedAt'] = moment().tz('Asia/Tokyo').format();
@@ -581,7 +581,7 @@ export default class {
   public isExistNextItemByLastEvaluatedKey = async (args: { queryCommandInput: LibDynamodb.QueryCommandInput; lastEvaluatedKey: Record<string, unknown> }): Promise<boolean> => {
     logger.info('dynamoService.isExistNextItemByLastEvaluatedKey', args);
     if (_.isEmpty(args?.queryCommandInput?.TableName)) {
-      throw new AgreementError(
+      throw new ArgumentError(
         `Argument "args.queryCommandInput.TableName" is unset \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -628,7 +628,7 @@ export default class {
   }): Promise<boolean> => {
     logger.info('dynamoService.isExistNextItemByLastEvaluatedKeyForScan', args);
     if (_.isEmpty(args?.scanCommandInput?.TableName)) {
-      throw new AgreementError(
+      throw new ArgumentError(
         `Argument "args.scanCommandInput.TableName" is not set \n ${JSON.stringify(
           {
             ...(args || {}),

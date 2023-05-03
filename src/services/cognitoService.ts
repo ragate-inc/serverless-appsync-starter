@@ -1,6 +1,6 @@
 import * as Cognito from '@aws-sdk/client-cognito-identity-provider';
 import logger from 'utils/logger';
-import { AgreementError, AWSSDKError } from 'exceptions/index';
+import { ArgumentError, AWSSDKError } from 'exceptions/index';
 import _ from 'lodash';
 import { AWS_REGION } from 'types/index';
 
@@ -13,7 +13,7 @@ export default class {
     this._userPoolId = (args?.userPoolId || process.env.COGNITO_USER_POOL_ID) as string;
     this._region = args?.region || (process.env.REGION as AWS_REGION);
     if (_.isEmpty(this._userPoolId)) {
-      throw new AgreementError(
+      throw new ArgumentError(
         `The environment variable "COGNITO_USER_POOL_ID" or argument is not set \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -25,7 +25,7 @@ export default class {
       );
     }
     if (_.isEmpty(this._region)) {
-      throw new AgreementError(
+      throw new ArgumentError(
         `Environment variable "REGION" or argument is not set \n ${JSON.stringify(
           {
             ...(args || {}),

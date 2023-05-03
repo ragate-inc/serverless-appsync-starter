@@ -1,14 +1,14 @@
 import logger from 'utils/logger';
 import Sqs from '@aws-sdk/client-sqs';
 import _ from 'lodash';
-import { AgreementError, AWSSDKError } from 'exceptions/index';
+import { ArgumentError, AWSSDKError } from 'exceptions/index';
 import { AWS_REGION } from 'types/index';
 
 export default class {
   constructor(args?: { region?: AWS_REGION }) {
     this._region = (args?.region || process.env.REGION) as AWS_REGION;
     if (_.isEmpty(this._region)) {
-      throw new AgreementError(
+      throw new ArgumentError(
         `Environment variable "REGION" or argument is not set \n ${JSON.stringify(
           {
             ...(args || {}),

@@ -14,10 +14,10 @@ export class SystemError extends BaseClass {
   }
 }
 
-export class AgreementError extends BaseClass {
+export class ArgumentError extends BaseClass {
   constructor(message?: string) {
     super(message);
-    this.name = 'AgreementError';
+    this.name = 'ArgumentError';
   }
 }
 

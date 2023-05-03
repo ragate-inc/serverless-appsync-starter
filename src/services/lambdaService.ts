@@ -1,7 +1,7 @@
 import logger from 'utils/logger';
 import * as Lambda from '@aws-sdk/client-lambda';
 import _ from 'lodash';
-import { AgreementError, AWSSDKError } from 'exceptions/index';
+import { ArgumentError, AWSSDKError } from 'exceptions/index';
 import { AWS_REGION } from 'types/index';
 
 export default class {
@@ -9,7 +9,7 @@ export default class {
     this._region = (args?.region || process.env.REGION) as AWS_REGION;
     this._prefix = ((args?.prefix || process.env.AWS_RESOURCE_PRIFIX) as AWS_REGION) || '';
     if (_.isEmpty(this._region)) {
-      throw new AgreementError(
+      throw new ArgumentError(
         `Environment variable "REGION" or argument is not set \n ${JSON.stringify(
           {
             ...(args || {}),
