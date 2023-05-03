@@ -11,10 +11,6 @@
 
 Please click [here](./docs/installation.md) to view the document.
 
-# <a name="contributing"></a> Contributing
-
-We love our contributors! Please read our [Contributing Document](./docs/contributing.md) to learn how you can start working on the Framework yourself.
-
 # <a name="contactus"></a> Contact Us
 
 https://www.ragate.co.jp/
