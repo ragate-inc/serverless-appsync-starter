@@ -23,11 +23,12 @@ yarn lint
 yarn format
 ```
 
-# Use lint-stage
+# About lint-stage
 
-The lint-stage performs a series of code quality checks. No modifications will be made, so please look at the execution results and modify as appropriate.
+In lint-staged, code quality checks are performed on git change diffs.
 
 ```bash
+# Code quality checks against git change diffs
 yarn lint-staged
 ```
 
