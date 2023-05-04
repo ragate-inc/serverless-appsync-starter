@@ -17,7 +17,28 @@
     "deploy:ap-northeast-1:prd": "yarn env:prd && yarn serverless:ap-northeast-1 && sls deploy --stage=prd",
     "deploy:us-east-1:dev": "yarn env:dev && yarn serverless:us-east-1 && sls deploy --stage=dev",
     "deploy:us-east-1:stg": "yarn env:stg && yarn serverless:us-east-1 && sls deploy --stage=stg",
-    "deploy:us-east-1:prd": "yarn env:prd && yarn serverless:us-east-1 && sls deploy --stage=prd"
+    "deploy:us-east-1:prd": "yarn env:prd && yarn serverless:us-east-1 && sls deploy --stage=prd",
+    "lint": "eslint . --fix",
+    "format": "prettier . --write",
+    "prepare": "husky install"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "eslintIgnore": [
+    "!/.github",
+    ".serverless",
+    "webpack.config.js"
+  ],
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint"
+    ],
+    "*.{css,html,js,json,md,yaml,yml,ts,js}": [
+      "prettier --check --write"
+    ]
   },
   "author": "Ragate inc.",
   "license": "MIT",
@@ -39,11 +60,13 @@
     "eslint-config-prettier": "^8.8.0",
     "eslint-config-standard-with-typescript": "^34.0.1",
     "fork-ts-checker-webpack-plugin": "^8.0.0",
+    "husky": "^8.0.3",
     "jest": "^29.5.0",
     "jest-circus": "^29.5.0",
     "jest-each": "^29.5.0",
     "jest-html-reporter": "^3.8.0",
-    "prettier": "^2.8.8",
+    "lint-staged": "^13.2.2",
+    "prettier": "2.8.8",
     "serverless": "^3.30.1",
     "serverless-appsync-plugin": "^2.2.0",
     "serverless-prune-plugin": "^2.0.2",

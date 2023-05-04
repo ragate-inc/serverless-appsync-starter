@@ -1,4 +1,3 @@
-// @ts-nocheck
 import AppsyncIdentityService from 'services/appsyncIdentityService';
 import { AppSyncIdentity } from 'aws-lambda';
 

@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { OPENSEARCH_INDEX_NAME } from 'services/openSearchService';
 
 /**
