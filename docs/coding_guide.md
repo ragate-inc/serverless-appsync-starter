@@ -22,3 +22,9 @@ yarn lint
 # for Prettier
 yarn format
 ```
+
+# How to custom huskey?
+
+```bash
+yarn husky add .husky/pre-commit "your command here"
+```
