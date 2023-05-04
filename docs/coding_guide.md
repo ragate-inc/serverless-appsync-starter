@@ -23,7 +23,17 @@ yarn lint
 yarn format
 ```
 
-# How to custom huskey?
+# Use lint-stage
+
+The lint-stage performs a series of code quality checks. No modifications will be made, so please look at the execution results and modify as appropriate.
+
+```bash
+yarn lint-staged
+```
+
+yarn lint-staged is also automatically executed when commits are created.
+
+# How to custom husky?
 
 ```bash
 yarn husky add .husky/pre-commit "your command here"

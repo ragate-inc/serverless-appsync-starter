@@ -20,21 +20,30 @@
     "deploy:us-east-1:prd": "yarn env:prd && yarn serverless:us-east-1 && sls deploy --stage=prd",
     "lint": "eslint . --fix",
     "format": "prettier . --write",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "postinstall": "husky install"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint"
+    ],
+    "*.{css,html,js,json,md,yaml,yml,ts,js}": [
+      "prettier . --write"
+    ],
+    "src/services/*.ts": [
+      "prettier . --write"
+    ]
   },
   "eslintIgnore": [
     "!/.github",
     ".serverless",
     "webpack.config.js"
   ],
-  "lint-staged": {
-    "*.{ts,js}": [
-      "eslint"
-    ],
-    "*.{css,html,js,json,md,yaml,yml,ts,js}": [
-      "prettier --check --write"
-    ]
-  },
   "author": "Ragate inc.",
   "license": "MIT",
   "devDependencies": {

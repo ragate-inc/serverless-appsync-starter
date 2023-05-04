@@ -9,6 +9,7 @@
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "baseUrl": "./",
     "paths": {
       "exceptions/*": ["./src/exceptions/*"],
       "services/*": ["./src/services/*"],
