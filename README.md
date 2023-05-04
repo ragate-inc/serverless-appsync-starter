@@ -1,3 +1,5 @@
+![Ragate Serverless starter](https://assets.ragate.co.jp/projects/serverless_starter/banner.jpg)
+
 # Serverless Starter
 
 Summarize the template for serverless projects for various types of development.
