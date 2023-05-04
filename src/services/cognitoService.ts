@@ -89,10 +89,13 @@ export default class {
       MFAOptions: [], // Seems to be able to disable it by updating it with empty (unofficial information).
     };
     if (args.twoStepAuthentication) {
-      params.MFAOptions!.push({
-        AttributeName: 'phone_number',
-        DeliveryMedium: 'SMS',
-      });
+      params.MFAOptions = [
+        ...(params.MFAOptions || []),
+        {
+          AttributeName: 'phone_number',
+          DeliveryMedium: 'SMS',
+        },
+      ];
     }
     const command = new Cognito.AdminSetUserSettingsCommand(params);
     try {

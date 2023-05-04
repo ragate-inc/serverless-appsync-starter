@@ -1,8 +1,11 @@
 type Query {
+  Example: String
 }
 
 type Mutation {
+  Example: String
 }
 
 type Subscription {
+  Example: String
 }
