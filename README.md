@@ -7,7 +7,7 @@ By using this template, anyone can start serverless development immediately.
 
 | Starter                                | Runtime  |
 | -------------------------------------- | -------- |
-| (Aws Node Appsync)[./aws-node-appsync] | node18.x |
+| [Aws Node Appsync](./aws-node-appsync) | node18.x |
 
 # <a name="contactus"></a> Contact Us
 
