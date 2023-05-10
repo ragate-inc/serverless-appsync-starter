@@ -1,36 +1,27 @@
 import logger from 'utils/logger';
 import * as Ses from '@aws-sdk/client-ses';
-import _ from 'lodash';
-import { ArgumentError, AWSSDKError } from 'exceptions/index';
-import { AWS_REGION } from 'types/index';
+import { AWSSDKError } from 'exceptions/index';
+import { AWS_REGION, AwsSdkServiceAbstract } from 'types/index';
 
-export default class {
+export default class extends AwsSdkServiceAbstract {
   constructor(args?: { region?: AWS_REGION }) {
-    this._region = (args?.region || process.env.REGION) as AWS_REGION;
-    if (_.isEmpty(this._region)) {
-      throw new ArgumentError(
-        `Environment variable "REGION" or argument is not set \n ${JSON.stringify(
-          {
-            ...(args || {}),
-            ...(process.env || {}),
-          },
-          null,
-          2
-        )}`
-      );
-    }
+    super(args);
     this._client = new Ses.SESClient({
-      region: this._region,
+      region: this.region,
     });
   }
-  private _region: AWS_REGION;
-  private _client: Ses.SESClient;
+
+  private readonly _client: Ses.SESClient;
+
+  private get client(): Ses.SESClient {
+    return this._client;
+  }
 
   public sendEmail = async (args: { sendEmailCommandInput: Ses.SendEmailCommandInput }): Promise<Ses.SendEmailCommandOutput> => {
     logger.info('sesService.sendEmail', args);
     const command = new Ses.SendEmailCommand(args.sendEmailCommandInput);
     try {
-      return await this._client.send(command);
+      return await this.client.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(

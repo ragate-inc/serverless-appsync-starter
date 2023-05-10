@@ -2,17 +2,17 @@ import * as Cognito from '@aws-sdk/client-cognito-identity-provider';
 import logger from 'utils/logger';
 import { ArgumentError, AWSSDKError } from 'exceptions/index';
 import _ from 'lodash';
-import { AWS_REGION } from 'types/index';
+import { AWS_REGION, AwsSdkServiceAbstract } from 'types/index';
 
 export enum UserPoolGroupName {
   Example = 'Example',
 }
 
-export default class {
+export default class extends AwsSdkServiceAbstract {
   constructor(args?: { region?: AWS_REGION; userPoolId?: string }) {
+    super(args);
     this._userPoolId = (args?.userPoolId || process.env.COGNITO_USER_POOL_ID) as string;
-    this._region = args?.region || (process.env.REGION as AWS_REGION);
-    if (_.isEmpty(this._userPoolId)) {
+    if (_.isEmpty(this.userPoolId)) {
       throw new ArgumentError(
         `The environment variable "COGNITO_USER_POOL_ID" or argument is not set \n ${JSON.stringify(
           {
@@ -24,26 +24,21 @@ export default class {
         )}`
       );
     }
-    if (_.isEmpty(this._region)) {
-      throw new ArgumentError(
-        `Environment variable "REGION" or argument is not set \n ${JSON.stringify(
-          {
-            ...(args || {}),
-            ...(process.env || {}),
-          },
-          null,
-          2
-        )}`
-      );
-    }
     this._client = new Cognito.CognitoIdentityProviderClient({
-      region: this._region,
+      region: this.region,
     });
   }
 
-  private _userPoolId: string;
-  private _region: AWS_REGION;
-  private _client: Cognito.CognitoIdentityProviderClient;
+  private readonly _userPoolId: string;
+  private readonly _client: Cognito.CognitoIdentityProviderClient;
+
+  private get userPoolId(): string {
+    return this._userPoolId;
+  }
+
+  private get client(): Cognito.CognitoIdentityProviderClient {
+    return this._client;
+  }
 
   /**
    * Adding a user to a user group
@@ -54,12 +49,12 @@ export default class {
     logger.info('cognitoService.addUserToGroup', args);
     const params: Cognito.AdminAddUserToGroupCommandInput = {
       GroupName: args.groupName,
-      UserPoolId: this._userPoolId,
+      UserPoolId: this.userPoolId,
       Username: args.username,
     };
     const command = new Cognito.AdminAddUserToGroupCommand(params);
     try {
-      return this._client.send(command);
+      return this.client.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
@@ -85,7 +80,7 @@ export default class {
     logger.info('cognitoService.setUserMFAPreference', args);
     const params: Cognito.AdminSetUserSettingsCommandInput = {
       Username: args.username,
-      UserPoolId: this._userPoolId,
+      UserPoolId: this.userPoolId,
       MFAOptions: [], // Seems to be able to disable it by updating it with empty (unofficial information).
     };
     if (args.twoStepAuthentication) {
@@ -99,7 +94,7 @@ export default class {
     }
     const command = new Cognito.AdminSetUserSettingsCommand(params);
     try {
-      return this._client.send(command);
+      return this.client.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
@@ -126,7 +121,7 @@ export default class {
   public createUser = (args: { username: string; password: string; phoneNumber?: string; email?: string }): Promise<Cognito.AdminCreateUserCommandOutput> => {
     logger.info('cognitoService.createUser', args);
     const params: Cognito.AdminCreateUserCommandInput = {
-      UserPoolId: this._userPoolId,
+      UserPoolId: this.userPoolId,
       Username: args.username,
       TemporaryPassword: args.password,
     };
@@ -162,7 +157,7 @@ export default class {
     }
     const command = new Cognito.AdminCreateUserCommand(params);
     try {
-      return this._client.send(command);
+      return this.client.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
@@ -189,12 +184,12 @@ export default class {
     const params: Cognito.AdminSetUserPasswordCommandInput = {
       Password: args.password,
       Username: args.username,
-      UserPoolId: this._userPoolId,
+      UserPoolId: this.userPoolId,
       Permanent: true,
     };
     const command = new Cognito.AdminSetUserPasswordCommand(params);
     try {
-      return this._client.send(command);
+      return this.client.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
@@ -218,12 +213,12 @@ export default class {
   public disableCognitoUser = (args: { username: string }): Promise<Cognito.AdminDisableUserCommandOutput> => {
     logger.info('cognitoService.disableCognitoUser', args);
     const params: Cognito.AdminDisableUserCommandInput = {
-      UserPoolId: this._userPoolId,
+      UserPoolId: this.userPoolId,
       Username: args.username,
     };
     const command = new Cognito.AdminDisableUserCommand(params);
     try {
-      return this._client.send(command);
+      return this.client.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
@@ -252,12 +247,12 @@ export default class {
     });
     const params: Cognito.AdminDeleteUserAttributesCommandInput = {
       UserAttributeNames: ['phone_number'], // phone_number_verified is automatically changed to false and is not specified
-      UserPoolId: this._userPoolId,
+      UserPoolId: this.userPoolId,
       Username: args.username,
     };
     const command = new Cognito.AdminDeleteUserAttributesCommand(params);
     try {
-      return this._client.send(command);
+      return this.client.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
@@ -292,12 +287,12 @@ export default class {
           Value: 'true',
         },
       ],
-      UserPoolId: this._userPoolId,
+      UserPoolId: this.userPoolId,
       Username: args.username,
     };
     const command = new Cognito.AdminUpdateUserAttributesCommand(params);
     try {
-      return this._client.send(command);
+      return this.client.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
@@ -320,16 +315,16 @@ export default class {
    */
   public isExistEmail = async (args: { email: string }): Promise<boolean> => {
     try {
-      const resultByEmail: Cognito.ListUsersCommandOutput = await this._client.send(
+      const resultByEmail: Cognito.ListUsersCommandOutput = await this.client.send(
         new Cognito.ListUsersCommand({
-          UserPoolId: this._userPoolId,
+          UserPoolId: this.userPoolId,
           Limit: 60,
           Filter: `email = '${args.email}'`,
         })
       );
-      const resultByPreferredUsername: Cognito.ListUsersCommandOutput = await this._client.send(
+      const resultByPreferredUsername: Cognito.ListUsersCommandOutput = await this.client.send(
         new Cognito.ListUsersCommand({
-          UserPoolId: this._userPoolId,
+          UserPoolId: this.userPoolId,
           Limit: 60,
           Filter: `preferred_username = '${args.email}'`,
         })

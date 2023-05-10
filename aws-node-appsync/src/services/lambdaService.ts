@@ -1,32 +1,21 @@
 import logger from 'utils/logger';
 import * as Lambda from '@aws-sdk/client-lambda';
 import _ from 'lodash';
-import { ArgumentError, AWSSDKError } from 'exceptions/index';
-import { AWS_REGION } from 'types/index';
+import { AWSSDKError } from 'exceptions/index';
+import { AWS_REGION, AwsSdkServiceAbstract } from 'types/index';
 
-export default class {
+export default class extends AwsSdkServiceAbstract {
   constructor(args?: { region?: AWS_REGION; prefix?: string }) {
-    this._region = (args?.region || process.env.REGION) as AWS_REGION;
-    this._prefix = ((args?.prefix || process.env.AWS_RESOURCE_PRIFIX) as AWS_REGION) || '';
-    if (_.isEmpty(this._region)) {
-      throw new ArgumentError(
-        `Environment variable "REGION" or argument is not set \n ${JSON.stringify(
-          {
-            ...(args || {}),
-            ...(process.env || {}),
-          },
-          null,
-          2
-        )}`
-      );
-    }
+    super(args);
     this._client = new Lambda.LambdaClient({
-      region: this._region,
+      region: this.region,
     });
   }
-  private _region: AWS_REGION;
-  private _client: Lambda.LambdaClient;
-  private _prefix: string;
+  private readonly _client: Lambda.LambdaClient;
+
+  private get client(): Lambda.LambdaClient {
+    return this._client;
+  }
 
   /**
    * Lambda call
@@ -41,7 +30,7 @@ export default class {
   }): Promise<Lambda.InvokeCommandOutput> => {
     logger.info('lambdaService.invokeLambda', args);
     const params: Lambda.InvokeCommandInput = {
-      FunctionName: this._prefix + args.functionName,
+      FunctionName: this.prefix + args.functionName,
       InvocationType: args.invocationType || 'RequestResponse',
     };
     if (args.payload) {
@@ -54,7 +43,7 @@ export default class {
     }
     const command = new Lambda.InvokeCommand(params);
     try {
-      return await this._client.send(command);
+      return await this.client.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
