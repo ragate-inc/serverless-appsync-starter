@@ -2,13 +2,13 @@ import _ from 'lodash';
 import { AWSSDKError } from 'exceptions/index';
 import * as LibDynamodb from '@aws-sdk/lib-dynamodb';
 import DynamoService from 'services/dynamoService';
-import { TABLES } from 'types/index';
+import { DYNAMO_TABLES } from 'types/index';
 
 export default class {
   public static lockProcess = async (args: { id: string; ttl?: number }): Promise<boolean> => {
     const { id, ttl } = args;
     const params: LibDynamodb.PutCommandInput = _.chain({
-      TableName: TABLES.IdempotenceProcess,
+      TableName: DYNAMO_TABLES.IdempotenceProcess,
       Item: {
         Id: id,
       },
@@ -44,7 +44,7 @@ export default class {
   public static unlockProcess = async (args: { id: string }): Promise<void> => {
     const { id } = args;
     const params: LibDynamodb.DeleteCommandInput = {
-      TableName: TABLES.IdempotenceProcess,
+      TableName: DYNAMO_TABLES.IdempotenceProcess,
       Key: {
         Id: id,
       },

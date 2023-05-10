@@ -38,7 +38,7 @@ export class NotFoundError extends BaseClass {
 export class DynamoDBAlreadyExistsError extends BaseClass {
   constructor(message?: string) {
     super(message);
-    this.name = 'AlreadyExistsError';
+    this.name = 'DynamoDBAlreadyExistsError';
   }
 }
 

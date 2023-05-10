@@ -1,30 +1,22 @@
 import logger from 'utils/logger';
 import Sqs from '@aws-sdk/client-sqs';
 import _ from 'lodash';
-import { ArgumentError, AWSSDKError } from 'exceptions/index';
-import { AWS_REGION } from 'types/index';
+import { AWSSDKError } from 'exceptions/index';
+import { AWS_REGION, AwsSdkServiceAbstract } from 'types/index';
 
-export default class {
+export default class extends AwsSdkServiceAbstract {
   constructor(args?: { region?: AWS_REGION }) {
-    this._region = (args?.region || process.env.REGION) as AWS_REGION;
-    if (_.isEmpty(this._region)) {
-      throw new ArgumentError(
-        `Environment variable "REGION" or argument is not set \n ${JSON.stringify(
-          {
-            ...(args || {}),
-            ...(process.env || {}),
-          },
-          null,
-          2
-        )}`
-      );
-    }
+    super(args);
     this._client = new Sqs.SQSClient({
-      region: this._region,
+      region: this.region,
     });
   }
-  private _region: AWS_REGION;
-  private _client: Sqs.SQSClient;
+
+  private readonly _client: Sqs.SQSClient;
+
+  private get client(): Sqs.SQSClient {
+    return this._client;
+  }
 
   /**
    * Delete a message in SQS
@@ -39,7 +31,7 @@ export default class {
     };
     const command = new Sqs.DeleteMessageCommand(params);
     try {
-      return await this._client.send(command);
+      return await this.client.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
@@ -84,7 +76,7 @@ export default class {
     }
     const command = new Sqs.SendMessageCommand(params);
     try {
-      return await this._client.send(command);
+      return await this.client.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(

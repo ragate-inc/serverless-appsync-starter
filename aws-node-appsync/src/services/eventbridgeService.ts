@@ -1,31 +1,22 @@
 import logger from 'utils/logger';
 import * as EventBridge from '@aws-sdk/client-eventbridge';
 import _ from 'lodash';
-import { ArgumentError, AWSSDKError } from 'exceptions/index';
+import { AWSSDKError } from 'exceptions/index';
 import moment from 'moment-timezone';
-import { AWS_REGION } from 'types/index';
+import { AWS_REGION, AwsSdkServiceAbstract } from 'types/index';
 
-export default class {
+export default class extends AwsSdkServiceAbstract {
   constructor(args?: { region?: AWS_REGION }) {
-    this._region = (args?.region || process.env.REGION) as AWS_REGION;
-    if (_.isEmpty(this._region)) {
-      throw new ArgumentError(
-        `Environment variable "REGION" or argument is not set \n ${JSON.stringify(
-          {
-            ...(args || {}),
-            ...(process.env || {}),
-          },
-          null,
-          2
-        )}`
-      );
-    }
+    super(args);
     this._client = new EventBridge.EventBridgeClient({
-      region: this._region,
+      region: this.region,
     });
   }
-  private _region: AWS_REGION;
-  private _client: EventBridge.EventBridgeClient;
+  private readonly _client: EventBridge.EventBridgeClient;
+
+  private get client(): EventBridge.EventBridgeClient {
+    return this._client;
+  }
 
   /**
    * Convert Date to EventBridge's Cron notation.
@@ -47,7 +38,7 @@ export default class {
     };
     const command = new EventBridge.DeleteRuleCommand(params);
     try {
-      return this._client.send(command);
+      return this.client.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
@@ -73,7 +64,7 @@ export default class {
     };
     const command = new EventBridge.ListTargetsByRuleCommand(params);
     try {
-      return this._client.send(command);
+      return this.client.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
@@ -98,7 +89,7 @@ export default class {
     };
     const command = new EventBridge.RemoveTargetsCommand(params);
     try {
-      return this._client.send(command);
+      return this.client.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(

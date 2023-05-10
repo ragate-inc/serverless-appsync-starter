@@ -6,7 +6,7 @@ import * as LibDynamodb from '@aws-sdk/lib-dynamodb';
 import moment from 'moment-timezone';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import NextToken from 'utils/nextToken';
-import { AWS_REGION, TABLES } from 'types/index';
+import { AWS_REGION, AwsSdkServiceAbstract, DYNAMO_TABLES } from 'types/index';
 
 type MakeUpdateItemCondition = {
   ExpressionAttributeNames: { [key: string]: string };
@@ -16,32 +16,25 @@ type MakeUpdateItemCondition = {
   Key: Record<string, unknown>;
 };
 
-export default class {
-  constructor(args?: { region?: AWS_REGION; tablePrefix?: string }) {
-    this._region = (args?.region || process.env.REGION) as AWS_REGION;
-    this._prefix = ((args?.tablePrefix || process.env.AWS_RESOURCE_PRIFIX) as AWS_REGION) || '';
-    if (_.isEmpty(this._region)) {
-      throw new ArgumentError(
-        `Environment variable "REGION" or argument is not set \n ${JSON.stringify(
-          {
-            ...(args || {}),
-            ...(process.env || {}),
-          },
-          null,
-          2
-        )}`
-      );
-    }
+export default class extends AwsSdkServiceAbstract {
+  constructor(args?: { region?: AWS_REGION; prefix?: string }) {
+    super(args);
     this._client = new DynamoDBClient({
-      region: this._region,
+      region: this.region,
     });
-    this._docClient = LibDynamodb.DynamoDBDocumentClient.from(this._client);
+    this._docClient = LibDynamodb.DynamoDBDocumentClient.from(this.client);
   }
 
-  private _region: AWS_REGION;
-  private _prefix: string;
-  private _docClient: LibDynamodb.DynamoDBDocumentClient;
-  private _client: DynamoDBClient;
+  private readonly _docClient: LibDynamodb.DynamoDBDocumentClient;
+  private readonly _client: DynamoDBClient;
+
+  get docClient(): LibDynamodb.DynamoDBDocumentClient {
+    return this._docClient;
+  }
+
+  get client(): DynamoDBClient {
+    return this._client;
+  }
 
   private _addCreatedAt = <T>(item: T): T => ({
     ...item,
@@ -73,11 +66,11 @@ export default class {
     }
     const params: LibDynamodb.GetCommandInput = _.chain(args.getItemCommandInput)
       .cloneDeep()
-      .assign({ TableName: `${this._prefix}${args.getItemCommandInput.TableName as string}` })
+      .assign({ TableName: `${this.prefix}${args.getItemCommandInput.TableName as string}` })
       .value();
     const command = new LibDynamodb.GetCommand(params);
     try {
-      return await this._docClient.send(command);
+      return await this.docClient.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
@@ -114,7 +107,7 @@ export default class {
     }
     const params: LibDynamodb.QueryCommandInput = (await _.chain(args.queryCommandInput)
       .cloneDeep()
-      .assign({ TableName: `${this._prefix}${args.queryCommandInput.TableName as string}` })
+      .assign({ TableName: `${this.prefix}${args.queryCommandInput.TableName as string}` })
       .thru(async (item) => {
         const res = await this._addExclusiveStartKeyByNextToken({
           item,
@@ -125,7 +118,7 @@ export default class {
       .value()) as LibDynamodb.QueryCommandInput;
     const command = new LibDynamodb.QueryCommand(params);
     try {
-      const res = await this._docClient.send(command);
+      const res = await this.docClient.send(command);
       if (res.LastEvaluatedKey) {
         const isExistNextItem = await this.isExistNextItemByLastEvaluatedKey({
           queryCommandInput: params,
@@ -175,7 +168,7 @@ export default class {
     }
     const params: LibDynamodb.ScanCommandInput = (await _.chain(args.scanCommandInput)
       .cloneDeep()
-      .assign({ TableName: `${this._prefix}${args.scanCommandInput.TableName as string}` })
+      .assign({ TableName: `${this.prefix}${args.scanCommandInput.TableName as string}` })
       .thru(async (item) => {
         const res = await this._addExclusiveStartKeyByNextToken({
           item,
@@ -186,7 +179,7 @@ export default class {
       .value()) as LibDynamodb.ScanCommandInput;
     const command = new LibDynamodb.ScanCommand(params);
     try {
-      const res = await this._docClient.send(command);
+      const res = await this.docClient.send(command);
       if (res.LastEvaluatedKey) {
         const isExistNextItem = await this.isExistNextItemByLastEvaluatedKeyForScan({
           scanCommandInput: params,
@@ -236,11 +229,11 @@ export default class {
     }
     const params: LibDynamodb.DeleteCommandInput = _.chain(args.deleteItemCommandInput)
       .cloneDeep()
-      .assign({ TableName: `${this._prefix}${args.deleteItemCommandInput.TableName as string}` })
+      .assign({ TableName: `${this.prefix}${args.deleteItemCommandInput.TableName as string}` })
       .value();
     const command = new LibDynamodb.DeleteCommand(params);
     try {
-      return await this._docClient.send(command);
+      return await this.docClient.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
@@ -277,7 +270,7 @@ export default class {
     }
     const params: LibDynamodb.PutCommandInput = _.chain(args.putItemCommandInput)
       .cloneDeep()
-      .assign({ TableName: `${this._prefix}${args.putItemCommandInput.TableName as string}` })
+      .assign({ TableName: `${this.prefix}${args.putItemCommandInput.TableName as string}` })
       .assign({
         Item: _.chain(args.putItemCommandInput.Item)
           .thru((item) => (_.has(item, 'CreatedAt') ? item : this._addCreatedAt(item)))
@@ -287,7 +280,7 @@ export default class {
       .value();
     const command = new LibDynamodb.PutCommand(params);
     try {
-      return await this._docClient.send(command);
+      return await this.docClient.send(command);
     } catch (e) {
       const err: Error = e as Error;
       if (err.name === 'ConditionalCheckFailedException' && _.includes(_.get(args.putItemCommandInput, 'ConditionExpression', ''), 'attribute_not_exists')) {
@@ -323,11 +316,11 @@ export default class {
    * @param writeRequests Write values
    */
   public batchWriteWithUnprocessedItems = async (args: {
-    tableName: TABLES;
+    tableName: DYNAMO_TABLES;
     writeRequests: Record<string, NativeAttributeValue>[];
   }): Promise<LibDynamodb.BatchWriteCommandOutput | undefined> => {
     logger.info('dynamoService.batchWriteWithUnprocessedItems', args);
-    const _tableName: string = this._prefix + args.tableName;
+    const _tableName: string = this.prefix + args.tableName;
     const _batchWrite = async (requestItems: Record<string, NativeAttributeValue>[]) => {
       const params: LibDynamodb.BatchWriteCommandInput = {
         RequestItems: {
@@ -335,7 +328,7 @@ export default class {
         },
       };
       const command = new LibDynamodb.BatchWriteCommand(params);
-      const res = await this._docClient.send(command);
+      const res = await this.docClient.send(command);
       return res.UnprocessedItems;
     };
     const unprocessedItems = await Promise.all(
@@ -412,7 +405,7 @@ export default class {
             result[k] = _.chain(v[k])
               .cloneDeep()
               .assign({
-                TableName: `${this._prefix}${tableName as string}`,
+                TableName: `${this.prefix}${tableName as string}`,
               })
               .thru((item) => {
                 if (k === 'Put') {
@@ -448,7 +441,7 @@ export default class {
 
     const command = new LibDynamodb.TransactWriteCommand(params);
     try {
-      return await this._docClient.send(command);
+      return await this.docClient.send(command);
     } catch (e) {
       const err: Error = e as Error;
       if (err.name === 'ConditionalCheckFailedException') {
@@ -524,7 +517,7 @@ export default class {
    * @param attributes written value
    */
   public updateAttributes = async (args: {
-    tableName: TABLES;
+    tableName: DYNAMO_TABLES;
     keyNames: string[];
     attributes: Record<string, NativeAttributeValue>;
     returnValues: 'ALL_NEW' | 'ALL_OLD' | 'NONE' | 'UPDATED_NEW' | 'UPDATED_OLD';
@@ -545,7 +538,7 @@ export default class {
     });
 
     const params: LibDynamodb.UpdateCommandInput = {
-      TableName: this._prefix + args.tableName,
+      TableName: this.prefix + args.tableName,
       Key: _updateConditions.Key,
       ReturnValues: returnValues,
       ExpressionAttributeNames: _updateConditions.ExpressionAttributeNames,
@@ -556,7 +549,7 @@ export default class {
 
     const command = new LibDynamodb.UpdateCommand(params);
     try {
-      return await this._docClient.send(command);
+      return await this.docClient.send(command);
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
@@ -592,14 +585,14 @@ export default class {
         )}`
       );
     }
-    const tableName = `${this._prefix}${args.queryCommandInput.TableName as string}`;
+    const tableName = `${this.prefix}${args.queryCommandInput.TableName as string}`;
     const params: LibDynamodb.QueryCommandInput = _.chain(args.queryCommandInput)
       .cloneDeep()
       .assign({ TableName: tableName, ExclusiveStartKey: args.lastEvaluatedKey, Limit: 1 })
       .value();
     const command = new LibDynamodb.QueryCommand(params);
     try {
-      const res = await this._docClient.send(command);
+      const res = await this.docClient.send(command);
       return res.Count ? res.Count > 0 : false;
     } catch (e) {
       const err: Error = e as Error;
@@ -639,14 +632,14 @@ export default class {
         )}`
       );
     }
-    const tableName = `${this._prefix}${args.scanCommandInput.TableName as string}`;
+    const tableName = `${this.prefix}${args.scanCommandInput.TableName as string}`;
     const params: LibDynamodb.ScanCommandInput = _.chain(args.scanCommandInput)
       .cloneDeep()
       .assign({ TableName: tableName, ExclusiveStartKey: args.lastEvaluatedKey, Limit: 1 })
       .value();
     const command = new LibDynamodb.ScanCommand(params);
     try {
-      const res = await this._docClient.send(command);
+      const res = await this.docClient.send(command);
       return res.Count ? res.Count > 0 : false;
     } catch (e) {
       const err: Error = e as Error;
