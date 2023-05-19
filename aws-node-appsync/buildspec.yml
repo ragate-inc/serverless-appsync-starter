@@ -8,6 +8,6 @@ phases:
       - yarn
   build:
     commands:
-      - npx eslint
+      - yarn lint
       - yarn test
       - npx sls deploy deploy:ap-northeast-1:${DEPLOY_ENV} --verbose
