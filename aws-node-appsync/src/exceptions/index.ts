@@ -7,24 +7,24 @@ export class BaseClass extends Error {
   }
 }
 
-export class SystemError extends BaseClass {
+export class BadRequestError extends BaseClass {
   constructor(message?: string) {
     super(message);
-    this.name = 'SystemError';
+    this.name = 'BadRequestError';
   }
 }
 
-export class ArgumentError extends BaseClass {
+export class UnauthorizedError extends BaseClass {
   constructor(message?: string) {
     super(message);
-    this.name = 'ArgumentError';
+    this.name = 'UnauthorizedError';
   }
 }
 
-export class UnAuthorizedError extends BaseClass {
+export class ForbiddenError extends BaseClass {
   constructor(message?: string) {
     super(message);
-    this.name = 'UnAuthorizedError';
+    this.name = 'ForbiddenError';
   }
 }
 
@@ -35,16 +35,11 @@ export class NotFoundError extends BaseClass {
   }
 }
 
-export class DynamoDBAlreadyExistsError extends BaseClass {
-  constructor(message?: string) {
-    super(message);
-    this.name = 'DynamoDBAlreadyExistsError';
-  }
-}
-
 export class AWSSDKError extends BaseClass {
-  constructor(message?: string) {
+  private sdkError: Error;
+  constructor(sdkError: Error, message?: string) {
     super(message);
+    this.sdkError = sdkError;
     this.name = 'AWSSDKError';
   }
 }
