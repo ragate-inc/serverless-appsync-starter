@@ -38,8 +38,8 @@ export class NotFoundError extends BaseClass {
 }
 
 export class AWSSDKError extends BaseClass {
-  constructor(sdkError: Error, message?: string) {
-    super(sdkError, message);
+  constructor(err: Error, message?: string) {
+    super(err, message);
     this.name = 'AWSSDKError';
   }
 }
