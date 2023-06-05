@@ -1,7 +1,7 @@
 import logger from 'utils/logger';
 import Sqs from '@aws-sdk/client-sqs';
 import _ from 'lodash';
-import { AWSSDKError } from 'exceptions/index';
+import { AWSSDKError, BadRequestError } from 'exceptions/index';
 import { AWS_REGION, AwsSdkServiceAbstract } from 'types/index';
 
 export default class extends AwsSdkServiceAbstract {
@@ -35,6 +35,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -67,8 +68,8 @@ export default class extends AwsSdkServiceAbstract {
       MessageBody: JSON.stringify(args.messagePayload),
     };
     if (args.messageGroupId || args.messageDeduplicationId) {
-      if (args.messageGroupId && !args.messageDeduplicationId) throw new AWSSDKError(`When specifying messageGroupId, please specify messageDeduplicationId. [sqsService.ts]`);
-      if (!args.messageGroupId && args.messageDeduplicationId) throw new AWSSDKError(`When specifying messageDeduplicationId, please specify messageGroupId. [sqsService.ts]`);
+      if (args.messageGroupId && !args.messageDeduplicationId) throw new BadRequestError(`When specifying messageGroupId, please specify messageDeduplicationId. [sqsService.ts]`);
+      if (!args.messageGroupId && args.messageDeduplicationId) throw new BadRequestError(`When specifying messageDeduplicationId, please specify messageGroupId. [sqsService.ts]`);
       _.assign(params, {
         MessageGroupId: args.messageGroupId,
         MessageDeduplicationId: args.messageDeduplicationId,
@@ -80,6 +81,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,

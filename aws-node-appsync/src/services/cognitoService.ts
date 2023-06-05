@@ -1,6 +1,6 @@
 import * as Cognito from '@aws-sdk/client-cognito-identity-provider';
 import logger from 'utils/logger';
-import { ArgumentError, AWSSDKError } from 'exceptions/index';
+import { BadRequestError, AWSSDKError } from 'exceptions/index';
 import _ from 'lodash';
 import { AWS_REGION, AwsSdkServiceAbstract } from 'types/index';
 
@@ -13,7 +13,7 @@ export default class extends AwsSdkServiceAbstract {
     super(args);
     this._userPoolId = (args?.userPoolId || process.env.COGNITO_USER_POOL_ID) as string;
     if (_.isEmpty(this.userPoolId)) {
-      throw new ArgumentError(
+      throw new BadRequestError(
         `The environment variable "COGNITO_USER_POOL_ID" or argument is not set \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -58,6 +58,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -98,6 +99,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -161,6 +163,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -193,6 +196,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -222,6 +226,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -256,6 +261,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -296,6 +302,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -337,6 +344,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
