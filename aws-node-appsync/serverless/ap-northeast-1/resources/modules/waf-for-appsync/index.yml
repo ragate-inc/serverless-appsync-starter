@@ -22,7 +22,7 @@ Resources:
       Name: Custom-IpAddress-whitelist
       Scope: REGIONAL
       IPAddressVersion: IPV4
-      Addresses: '${self:custom.modules.wafv2.wafIpWhiteList.${self:provider.stage}}'
+      Addresses: '${self:custom.modules.wafforappsync.wafIpWhiteList.${self:provider.stage}}'
 
   ### If there are multiple targets, duplicate the following resources (AWS::WAFv2::WebACL,AWS::KinesisFirehose::DeliveryStream) for the number of targets
   ## Be sure to enable Logging after deployment
