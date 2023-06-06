@@ -1,5 +1,5 @@
 export class BaseClass extends Error {
-  private _err?: Error;
+  private readonly _err?: Error;
   constructor(err?: Error, message?: string) {
     super(message);
     this.name = new.target.name;
