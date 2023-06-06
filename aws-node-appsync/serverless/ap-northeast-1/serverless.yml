@@ -29,9 +29,7 @@ resources:
   - ${file(./serverless/ap-northeast-1/resources/dynamodb-tables.yml)}
   - ${file(./serverless/ap-northeast-1/resources/iam-role.yml)}
   - ${file(./serverless/ap-northeast-1/resources/sns.yml)}
-  # - ${file(./serverless/ap-northeast-1/resources/lambda-permission.yml)}
   - ${file(./serverless/ap-northeast-1/resources/modules/dynamodb-tables-cloud-watch-alarm/index.yml)}
-  # - ${file(./serverless/ap-northeast-1/resources/modules/waf-for-appsync/index.yml)}
   - ${file(./serverless/ap-northeast-1/resources/modules/appsync/index.yml)}
   - ${file(./serverless/ap-northeast-1/resources/modules/cicd-serverless-deploy/index.yml)}
   - ${file(./serverless/ap-northeast-1/resources/modules/aws-backup/index.yml)}
@@ -58,15 +56,12 @@ custom:
   sns:
     lambdaErrorNotifyTopicName: '${env:LAMBDA_ERROR_NOTIFY_SNS_TOPIC_NAME}'
     errorNotifySubscriptions:
-      # - Endpoint: !GetAtt SendSlackMessageLambdaFunction.Arn
-      #   Protocol: lambda
       - Endpoint: ${env:INCIDENT_ALARM_EMAIL_ADDRESS}
         Protocol: email
   prune:
     automatic: true
     number: 3
   modules:
-    # wafforappsync: ${file(./serverless/ap-northeast-1/resources/modules/waf-for-appsync/config.yml)}
     serverlessdeploy: ${file(./serverless/ap-northeast-1/resources/modules/cicd-serverless-deploy/config.yml)}
     dynamodbTablesCloudWatchAlarm: ${file(./serverless/ap-northeast-1/resources/modules/dynamodb-tables-cloud-watch-alarm/config.yml)}
     awsBackup: ${file(./serverless/ap-northeast-1/resources/modules/aws-backup/config.yml)}
