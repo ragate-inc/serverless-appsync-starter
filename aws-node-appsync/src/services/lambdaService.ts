@@ -47,6 +47,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,

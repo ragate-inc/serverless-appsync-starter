@@ -1,4 +1,4 @@
-import { ArgumentError } from 'exceptions/index';
+import { BadRequestError } from 'exceptions/index';
 import _ from 'lodash';
 
 // dynamodb tables
@@ -48,7 +48,7 @@ export abstract class AwsSdkServiceAbstract {
     this._region = (args?.region || process.env.REGION) as AWS_REGION;
     this._prefix = ((args?.prefix || process.env.AWS_RESOURCE_PRIFIX) as string) || '';
     if (_.isEmpty(this.region)) {
-      throw new ArgumentError(
+      throw new BadRequestError(
         `Environment variable "REGION" or argument is not set \n ${JSON.stringify(
           {
             ...(args || {}),

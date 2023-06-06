@@ -1,39 +1,49 @@
 export class BaseClass extends Error {
-  private err?: Error;
+  private readonly _err?: Error;
   constructor(err?: Error, message?: string) {
     super(message);
     this.name = new.target.name;
-    this.err = err;
+    this._err = err;
     if (Error.captureStackTrace) Error.captureStackTrace(this, this.constructor);
     Object.setPrototypeOf(this, new.target.prototype);
+  }
+  public get err(): Error | undefined {
+    return this._err;
   }
 }
 
 export class BadRequestError extends BaseClass {
-  constructor(err?: Error, message?: string) {
+  constructor(message?: string, err?: Error) {
     super(err, message);
     this.name = 'BadRequestError';
   }
 }
 
 export class UnauthorizedError extends BaseClass {
-  constructor(err?: Error, message?: string) {
+  constructor(message?: string, err?: Error) {
     super(err, message);
     this.name = 'UnauthorizedError';
   }
 }
 
 export class ForbiddenError extends BaseClass {
-  constructor(err?: Error, message?: string) {
+  constructor(message?: string, err?: Error) {
     super(err, message);
     this.name = 'ForbiddenError';
   }
 }
 
 export class NotFoundError extends BaseClass {
-  constructor(err?: Error, message?: string) {
+  constructor(message?: string, err?: Error) {
     super(err, message);
     this.name = 'NotFoundError';
+  }
+}
+
+export class ConflictError extends BaseClass {
+  constructor(message?: string, err?: Error) {
+    super(err, message);
+    this.name = 'ConflictError';
   }
 }
 

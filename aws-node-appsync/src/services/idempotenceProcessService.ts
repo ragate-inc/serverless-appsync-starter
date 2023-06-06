@@ -28,6 +28,7 @@ export default class {
         return false;
       }
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -57,6 +58,7 @@ export default class {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,

@@ -1,23 +1,25 @@
-- name: '${self:custom.awsResourcePrefix}graphql'
-  authenticationType: API_KEY # AMAZON_COGNITO_USER_POOLS
-  schema: 'appsync/schema.graphql'
-  caching:
-    behavior: PER_RESOLVER_CACHING
-    ttl: 3600
-    type: 'SMALL'
-  # if using CognitoUserPool
-  # userPoolConfig:
-  #   defaultAction: ALLOW
-  #   userPoolId: !Ref CognitoUserPool
-  logConfig:
-    loggingRoleArn: { Fn::GetAtt: [AppSyncLoggingServiceRole, Arn] }
-    level: ALL
-    excludeVerboseContent: false
-  mappingTemplatesLocation: appsync/resolvers
-  functionConfigurationsLocation: appsync/resolvers
-  functionConfigurations:
-    - ${file(./appsync/functionConfigurations.yml)}
-  mappingTemplates:
-    - ${file(./appsync/mappingtemplates.yml)}
-  dataSources:
-    - ${file(./appsync/datasources.yml)}
+name: '${self:custom.awsResourcePrefix}graphql'
+authentication:
+  type: API_KEY # AMAZON_COGNITO_USER_POOLS
+# if using CognitoUserPool
+#   config:
+#     userPoolId: !Ref CognitoUserPool
+# additionalAuthentications:
+#   - type: API_KEY
+apiKeys:
+  - name: apiKey
+schema: 'appsync/schema.graphql'
+caching:
+  behavior: PER_RESOLVER_CACHING
+  ttl: 3600
+  type: 'SMALL'
+logging:
+  loggingRoleArn: { Fn::GetAtt: [AppSyncLoggingServiceRole, Arn] }
+  level: ALL
+  excludeVerboseContent: false
+# pipelineFunctions:
+#   - ${file(./appsync/pipelineFunctions.yml)}
+resolvers:
+  - ${file(./appsync/resolvers.yml)}
+dataSources:
+  - ${file(./appsync/datasources.yml)}

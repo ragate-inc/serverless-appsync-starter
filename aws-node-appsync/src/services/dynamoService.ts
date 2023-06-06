@@ -1,5 +1,5 @@
 import logger from 'utils/logger';
-import { ArgumentError, AWSSDKError, DynamoDBAlreadyExistsError } from 'exceptions/index';
+import { BadRequestError, AWSSDKError, ConflictError } from 'exceptions/index';
 import _ from 'lodash';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import * as LibDynamodb from '@aws-sdk/lib-dynamodb';
@@ -53,7 +53,7 @@ export default class extends AwsSdkServiceAbstract {
   public getItem = async (args: { getItemCommandInput: LibDynamodb.GetCommandInput }): Promise<LibDynamodb.GetCommandOutput> => {
     logger.info('dynamoService.getItem', args.getItemCommandInput);
     if (_.isEmpty(args.getItemCommandInput.TableName)) {
-      throw new ArgumentError(
+      throw new BadRequestError(
         `Argument "args.getItemCommandInput.TableName" , is unset \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -74,6 +74,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -94,7 +95,7 @@ export default class extends AwsSdkServiceAbstract {
   public query = async (args: { queryCommandInput: LibDynamodb.QueryCommandInput & { NextToken?: string } }): Promise<LibDynamodb.QueryCommandOutput & { NextToken?: string }> => {
     logger.info('dynamoService.query', args.queryCommandInput);
     if (_.isEmpty(args.queryCommandInput.TableName)) {
-      throw new ArgumentError(
+      throw new BadRequestError(
         `Argument "args.queryCommandInput.TableName" , is unset. \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -135,6 +136,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -155,7 +157,7 @@ export default class extends AwsSdkServiceAbstract {
   public scan = async (args: { scanCommandInput: LibDynamodb.ScanCommandInput & { NextToken?: string } }): Promise<LibDynamodb.ScanCommandOutput & { NextToken?: string }> => {
     logger.info('dynamoService.scan', args);
     if (_.isEmpty(args.scanCommandInput.TableName)) {
-      throw new ArgumentError(
+      throw new BadRequestError(
         `Argument "args.scanCommandInput.TableName" , is unset. \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -196,6 +198,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -216,7 +219,7 @@ export default class extends AwsSdkServiceAbstract {
   public deleteItem = async (args: { deleteItemCommandInput: LibDynamodb.DeleteCommandInput }): Promise<LibDynamodb.DeleteCommandOutput> => {
     logger.info('dynamoService.deleteItem', args.deleteItemCommandInput);
     if (_.isEmpty(args.deleteItemCommandInput.TableName)) {
-      throw new ArgumentError(
+      throw new BadRequestError(
         `Argument "args.deleteItemCommandInput.TableName" , is unset \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -237,6 +240,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -257,7 +261,7 @@ export default class extends AwsSdkServiceAbstract {
   public putItem = async (args: { putItemCommandInput: LibDynamodb.PutCommandInput }): Promise<LibDynamodb.PutCommandOutput> => {
     logger.info('dynamoService.putItem', args);
     if (_.isEmpty(args.putItemCommandInput.TableName)) {
-      throw new ArgumentError(
+      throw new BadRequestError(
         `Argument "args.putItemCommandInput.TableName" , is unset \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -284,7 +288,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       if (err.name === 'ConditionalCheckFailedException' && _.includes(_.get(args.putItemCommandInput, 'ConditionExpression', ''), 'attribute_not_exists')) {
-        throw new DynamoDBAlreadyExistsError(
+        throw new ConflictError(
           JSON.stringify(
             {
               stack: err.stack,
@@ -297,6 +301,7 @@ export default class extends AwsSdkServiceAbstract {
         );
       }
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -362,6 +367,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -400,7 +406,7 @@ export default class extends AwsSdkServiceAbstract {
             const k = key as 'Put' | 'Delete' | 'Update' | 'ConditionCheck';
             const tableName = v[k]?.TableName;
             if (_.isEmpty(tableName)) {
-              throw new ArgumentError(`TableName is required \n ${JSON.stringify(args, null, 2)}`);
+              throw new BadRequestError(`TableName is required \n ${JSON.stringify(args, null, 2)}`);
             }
             result[k] = _.chain(v[k])
               .cloneDeep()
@@ -416,10 +422,10 @@ export default class extends AwsSdkServiceAbstract {
                 } else if (k === 'Update') {
                   const v = item as LibDynamodb.UpdateCommandInput;
                   const expressionAttributeNames = v.ExpressionAttributeNames;
-                  if (_.isEmpty(expressionAttributeNames)) throw new ArgumentError(`ExpressionAttributeNames is required \n ${JSON.stringify(args, null, 2)}`);
+                  if (_.isEmpty(expressionAttributeNames)) throw new BadRequestError(`ExpressionAttributeNames is required \n ${JSON.stringify(args, null, 2)}`);
                   const expressionAttributeValues = v.ExpressionAttributeValues;
-                  if (_.isEmpty(expressionAttributeValues)) throw new ArgumentError(`ExpressionAttributeValues is required \n ${JSON.stringify(args, null, 2)}`);
-                  if (_.isEmpty(v.UpdateExpression)) throw new ArgumentError(`UpdateExpression is required \n ${JSON.stringify(args, null, 2)}`);
+                  if (_.isEmpty(expressionAttributeValues)) throw new BadRequestError(`ExpressionAttributeValues is required \n ${JSON.stringify(args, null, 2)}`);
+                  if (_.isEmpty(v.UpdateExpression)) throw new BadRequestError(`UpdateExpression is required \n ${JSON.stringify(args, null, 2)}`);
                   if (!_hasValueInObject(expressionAttributeNames, 'UpdatedAt')) {
                     expressionAttributeNames['#UpdatedAt'] = 'UpdatedAt';
                     expressionAttributeValues[':UpdatedAt'] = moment().tz('Asia/Tokyo').format();
@@ -445,7 +451,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       if (err.name === 'ConditionalCheckFailedException') {
-        throw new DynamoDBAlreadyExistsError(
+        throw new ConflictError(
           JSON.stringify(
             {
               stack: err.stack,
@@ -458,6 +464,7 @@ export default class extends AwsSdkServiceAbstract {
         );
       }
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -515,12 +522,17 @@ export default class extends AwsSdkServiceAbstract {
    * @param tableName table name
    * @param keyNames Index attribute name
    * @param attributes written value
+   * @param returnValues return value
+   * @param conditionExpression condition expression
+   * @param expressionAttributeValues expression attribute values
    */
   public updateAttributes = async (args: {
     tableName: DYNAMO_TABLES;
     keyNames: string[];
     attributes: Record<string, NativeAttributeValue>;
     returnValues: 'ALL_NEW' | 'ALL_OLD' | 'NONE' | 'UPDATED_NEW' | 'UPDATED_OLD';
+    conditionExpression?: string;
+    expressionAttributeValues?: Record<string, unknown>;
   }): Promise<LibDynamodb.UpdateCommandOutput> => {
     logger.info('dynamoService.updateAttributes', args);
     const returnValues = args.returnValues || 'UPDATED_NEW';
@@ -542,10 +554,15 @@ export default class extends AwsSdkServiceAbstract {
       Key: _updateConditions.Key,
       ReturnValues: returnValues,
       ExpressionAttributeNames: _updateConditions.ExpressionAttributeNames,
-      ExpressionAttributeValues: _updateConditions.ExpressionAttributeValues,
-      ConditionExpression: _updateConditions.ConditionExpression,
+      ExpressionAttributeValues: _.chain([args.expressionAttributeValues, _updateConditions.ExpressionAttributeValues])
+        .compact()
+        .reduce((condition, values) => _.assign(condition, values), {})
+        .value(),
+      ConditionExpression: _.chain([args.conditionExpression, _updateConditions.ConditionExpression]).compact().join(' and ').value(),
       UpdateExpression: _updateConditions.UpdateExpression,
     };
+
+    logger.info('dynamoService.updateAttributes.params', params);
 
     const command = new LibDynamodb.UpdateCommand(params);
     try {
@@ -553,6 +570,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -574,7 +592,7 @@ export default class extends AwsSdkServiceAbstract {
   public isExistNextItemByLastEvaluatedKey = async (args: { queryCommandInput: LibDynamodb.QueryCommandInput; lastEvaluatedKey: Record<string, unknown> }): Promise<boolean> => {
     logger.info('dynamoService.isExistNextItemByLastEvaluatedKey', args);
     if (_.isEmpty(args?.queryCommandInput?.TableName)) {
-      throw new ArgumentError(
+      throw new BadRequestError(
         `Argument "args.queryCommandInput.TableName" is unset \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -597,6 +615,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
@@ -621,7 +640,7 @@ export default class extends AwsSdkServiceAbstract {
   }): Promise<boolean> => {
     logger.info('dynamoService.isExistNextItemByLastEvaluatedKeyForScan', args);
     if (_.isEmpty(args?.scanCommandInput?.TableName)) {
-      throw new ArgumentError(
+      throw new BadRequestError(
         `Argument "args.scanCommandInput.TableName" is not set \n ${JSON.stringify(
           {
             ...(args || {}),
@@ -644,6 +663,7 @@ export default class extends AwsSdkServiceAbstract {
     } catch (e) {
       const err: Error = e as Error;
       throw new AWSSDKError(
+        err,
         JSON.stringify(
           {
             stack: err.stack,
