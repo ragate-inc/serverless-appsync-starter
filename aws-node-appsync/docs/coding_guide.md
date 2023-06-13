@@ -10,8 +10,8 @@ The settings for VSCODE are provided in .vscode/settings.json, and code formatti
 
 The project uses the following tools to improve code quality
 
-- (ESLint)[https://eslint.org/]
-- (Prettier)[https://prettier.io/]
+- [ESLint](https://eslint.org/)
+- [Prettier](https://prettier.io/)
 
 The above are available for execution of the following commands, and implementors are encouraged to perform quality checks of the implemented source code as appropriate.
 
