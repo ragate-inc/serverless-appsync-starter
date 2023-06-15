@@ -9,5 +9,5 @@ phases:
   build:
     commands:
       - npx eslint
-      - yarn test
+      - npx jest --config __test__/jest.config.js --all
       - npx sls deploy deploy:ap-northeast-1:${DEPLOY_ENV} --verbose
