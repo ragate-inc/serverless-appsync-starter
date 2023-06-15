@@ -89,6 +89,7 @@
     "@aws-sdk/protocol-http": "^3.310.0",
     "@aws-sdk/signature-v4": "^3.310.0",
     "@aws-sdk/util-dynamodb": "3.321.1",
+    "@middy/core": "^4.5.1",
     "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.21",
     "moment-timezone": "^0.5.43"
