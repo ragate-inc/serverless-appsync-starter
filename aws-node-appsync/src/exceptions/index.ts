@@ -1,50 +1,55 @@
 export class BaseClass extends Error {
-  constructor(message?: string) {
+  private readonly _err?: Error;
+  constructor(err?: Error, message?: string) {
     super(message);
     this.name = new.target.name;
+    this._err = err;
     if (Error.captureStackTrace) Error.captureStackTrace(this, this.constructor);
     Object.setPrototypeOf(this, new.target.prototype);
   }
-}
-
-export class SystemError extends BaseClass {
-  constructor(message?: string) {
-    super(message);
-    this.name = 'SystemError';
+  public get err(): Error | undefined {
+    return this._err;
   }
 }
 
-export class ArgumentError extends BaseClass {
-  constructor(message?: string) {
-    super(message);
-    this.name = 'ArgumentError';
+export class BadRequestError extends BaseClass {
+  constructor(message?: string, err?: Error) {
+    super(err, message);
+    this.name = 'BadRequestError';
   }
 }
 
-export class UnAuthorizedError extends BaseClass {
-  constructor(message?: string) {
-    super(message);
-    this.name = 'UnAuthorizedError';
+export class UnauthorizedError extends BaseClass {
+  constructor(message?: string, err?: Error) {
+    super(err, message);
+    this.name = 'UnauthorizedError';
+  }
+}
+
+export class ForbiddenError extends BaseClass {
+  constructor(message?: string, err?: Error) {
+    super(err, message);
+    this.name = 'ForbiddenError';
   }
 }
 
 export class NotFoundError extends BaseClass {
-  constructor(message?: string) {
-    super(message);
+  constructor(message?: string, err?: Error) {
+    super(err, message);
     this.name = 'NotFoundError';
   }
 }
 
-export class DynamoDBAlreadyExistsError extends BaseClass {
-  constructor(message?: string) {
-    super(message);
-    this.name = 'DynamoDBAlreadyExistsError';
+export class ConflictError extends BaseClass {
+  constructor(message?: string, err?: Error) {
+    super(err, message);
+    this.name = 'ConflictError';
   }
 }
 
 export class AWSSDKError extends BaseClass {
-  constructor(message?: string) {
-    super(message);
+  constructor(err: Error, message?: string) {
+    super(err, message);
     this.name = 'AWSSDKError';
   }
 }

@@ -1,11 +1,14 @@
-- type: NONE
-  name: 'LocalResolver'
+LocalResolver:
+  type: NONE
   description: 'LocalResolver.'
 
 # ▼ DynamoDB
-- type: AMAZON_DYNAMODB
-  name: UserDynamoTable
-  description: !Ref UserDynamoTable
+UserDynamoTable:
+  type: AMAZON_DYNAMODB
+  description: UserDynamoTable
   config:
     tableName: !Ref UserDynamoTable
     serviceRoleArn: { Fn::GetAtt: [AppSyncDynamoDBServiceRole, Arn] }
+
+# ▼ Lambda
+
