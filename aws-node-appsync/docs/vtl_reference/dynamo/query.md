@@ -10,23 +10,23 @@ You only need to modify a few predefined parts to implement the query operation.
 # Usage
 
 ## basic
-By modifying the "共通設定" section at the top of the VTL template code described below, queries can be generated for each use case.
-Modifications to code other than the "共通設定" can be made at the discretion of the developer, but are not supported in this document.
+By modifying the "User Input" section at the top of the VTL template code described below, queries can be generated for each use case.
+Modifications to code other than the "User Input" can be made at the discretion of the developer, but are not supported in this document.
 
 ## Partition key only queries
 Enter only information about the primary key. The following is an example configuration.
 ```velocity
-## [Start] 共通設定
+## [Start] User Input
 #set( $primaryKey = "Id" )
 #set( $primaryValue = $ctx.source.Id )
 #set( $args = $ctx.args )
-## [End] 共通設定
+## [End] Common
 ```
 
 ## Query with sort key
 In addition to the primary key, enter information about the sort key. The following is an example configuration.
 ```velocity
-## [Start] 共通設定
+## [Start] User Input
 #set( $primaryKey = "Id" )
 #set( $primaryValue = $ctx.args.Id )
 #set( $sortKeyName = "Sk" )
@@ -34,32 +34,32 @@ In addition to the primary key, enter information about the sort key. The follow
   "beginsWith": "Activity#",
 } )
 #set( $args = $ctx.args )
-## [End] 共通設定
+## [End] User Input
 ```
 
 ## Query using GSI
 In addition to the primary key and sort key, enter the GSI index name. The following is an example configuration.
 ```velocity
-## [Start] 共通設定
+## [Start] User Input
 #set( $indexName = "PaymentHistoryByIdPaymentAt" )
 #set( $primaryKey = "Id" )
 #set( $primaryValue = $ctx.args.Id )
 #set( $args = $ctx.args )
-## [End] 共通設定
+## [End] User Input
 ```
 
 # Request template
 ```velocity
-## [Start] 共通設定
+## [Start] User Input
 #set( $indexName = "your gsi index name" )
 #set( $primaryKey = "your primary key attribute name" )
 #set( $primaryValue = "your primary key value" )
 #set( $sortKeyName = "your sort key attribute name" )
 #set( $sortKeyValue = "your sort key value" )
 #set( $args = $ctx.args )
-## [End] 共通設定
+## [End] User Input
 
-## [Start] バリデーション
+## [Start] validation
 #set( $modelQueryExpression = {} )
 #if( $util.isNullOrEmpty($primaryValue) )
   $util.error("PrimaryValue is null.", "InvalidIndexValueError")
@@ -72,9 +72,9 @@ In addition to the primary key and sort key, enter the GSI index name. The follo
     ":$primaryKey": $util.dynamodb.toDynamoDB($primaryValue)
   })
 #end
-## [End] バリデーション
+## [End] validation
 
-## [Start] ソートキー用クエリー生成
+## [Start] Query generation for sort key
 #if( !$util.isNullOrEmpty($sortKeyName) && !$util.isNullOrEmpty($sortKeyValue) )
   #if( !$util.isNull($sortKeyValue.beginsWith) )
     #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND begins_with(#sortKey, :sortKey)" )
@@ -116,9 +116,9 @@ In addition to the primary key and sort key, enter the GSI index name. The follo
   #else
   #end
 #end
-## [End] ソートキー用クエリー生成
+## [End] Query generation for sort key
 
-## [Start] VTL文字列出力
+## [Start] VTL string output
 #set( $limit = $util.defaultIfNull($args.limit, 100) )
 #set( $request = {
   "version": "2018-05-29",
@@ -147,7 +147,7 @@ In addition to the primary key and sort key, enter the GSI index name. The follo
     $util.qr($request.put("index", $indexName))
 #end
 $util.toJson($request)
-## [End] VTL文字列出力
+## [End] VTL string output
 ```
 
 # Response template
