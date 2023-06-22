@@ -28,7 +28,7 @@ yarn
 # Does not provide local server environment startup
 
 Serverless offline, local stacks, etc. are not implemented.
-See [here](./unit_test.md) for the reason.
+See [here](./how_to_unit_test.md) for the reason.
 
 # Next Steps
 
