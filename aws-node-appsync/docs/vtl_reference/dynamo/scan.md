@@ -3,8 +3,11 @@ This section describes how to implement a VTL template to execute a scan operati
 
 You only need to modify a few predefined parts to implement the query operation.
 
-# Provide
 # Usage
+Basic Scan operations can be implemented as follows.
+
+For other use cases, see [here](https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/Scan.html).
+
 # Request template
 ```velocity
 #set( $args = $ctx.args )
