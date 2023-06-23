@@ -1,16 +1,18 @@
 # Description
 This section describes how to implement a VTL template to execute a query operation to AWS DynamoDB.
+
 You only need to modify a few predefined parts to implement the query operation.
 
 # Provide
 - Generating queries using only partition keys
-- Generating Queries Using Sort Keys
+- Generating queries using sort keys
 - Generating queries using GSI
 
 # Usage
 
 ## basic
 By modifying the "User Input" section at the top of the VTL template code described below, queries can be generated for each use case.
+
 Modifications to code other than the "User Input" can be made at the discretion of the developer, but are not supported in this document.
 
 ## Partition key only queries

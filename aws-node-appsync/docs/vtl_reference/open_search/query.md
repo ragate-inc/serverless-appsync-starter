@@ -33,7 +33,7 @@
   #else
     $util.error("Unauthorized to run aggregation on field: ${aggItem.field}", "Unauthorized")
   #end
-  $util.qr($aggregateValues.put("$aggItem.name", { "filter": $aggFilter, "aggs": { "$aggItem.name": { "$aggItem.type": { "field": "$aggItem.field" }}} }))
+  $util.qr($aggregateValues.put("$aggItem.name", { "filter": $aggFilter, "aggs": { "$aggItem.name": { "$aggItem.type": { "field": "$aggItem.field" } } } }))
 #end
 ## [END] Aggregates applied (fields to be analyzed)
 

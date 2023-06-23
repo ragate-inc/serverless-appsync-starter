@@ -2,12 +2,13 @@
 This section describes how to operate the local resolver.
 
 # Provide
-- Generate a local resolver by specifying the primary key from the argument
-- Generate a local resolver by specifying the primary key from the relation
+- Generating a local resolver by specifying the primary key from the argument
+- Generating a local resolver by specifying the primary key from the relation
 
 # Usage
 ## basic
 Local resolvers can be generated for each use case by modifying the "User Input" section at the top of the VTL template code, described below.
+
 Modifications to code other than the "User Input" can be made at the discretion of the developer, but are not supported in this document.
 
 ## Specify partition key from args

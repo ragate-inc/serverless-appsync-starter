@@ -1,7 +1,10 @@
 # Description
+This section describes how to implement a VTL template to execute a scan operation to AWS DynamoDB.
+
+You only need to modify a few predefined parts to implement the query operation.
+
 # Provide
 # Usage
-## basic
 # Request template
 ```velocity
 #set( $args = $ctx.args )
