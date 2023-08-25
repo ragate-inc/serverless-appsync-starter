@@ -1,5 +1,5 @@
 import logger from 'utils/logger';
-import Sqs from '@aws-sdk/client-sqs';
+import * as Sqs from '@aws-sdk/client-sqs';
 import _ from 'lodash';
 import { AWSSDKError, BadRequestError } from 'exceptions/index';
 import { AWS_REGION, AwsSdkServiceAbstract } from 'types/index';
