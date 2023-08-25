@@ -2,6 +2,8 @@ service: starter
 
 useDotenv: true
 
+configValidationMode: error # Configuration validation: 'error' (fatal error), 'warn' (logged to the output) or 'off' (default: warn)
+
 provider:
   name: aws
   deploymentMethod: direct
@@ -27,16 +29,13 @@ resources:
   - ${file(./serverless/ap-northeast-1/resources/dynamodb-tables.yml)}
   - ${file(./serverless/ap-northeast-1/resources/iam-role.yml)}
   - ${file(./serverless/ap-northeast-1/resources/sns.yml)}
-  - ${file(./serverless/ap-northeast-1/resources/lambda-permission.yml)}
   - ${file(./serverless/ap-northeast-1/resources/modules/dynamodb-tables-cloud-watch-alarm/index.yml)}
-  - ${file(./serverless/ap-northeast-1/resources/modules/waf-for-appsync/index.yml)}
   - ${file(./serverless/ap-northeast-1/resources/modules/appsync/index.yml)}
   - ${file(./serverless/ap-northeast-1/resources/modules/cicd-serverless-deploy/index.yml)}
   - ${file(./serverless/ap-northeast-1/resources/modules/aws-backup/index.yml)}
 
 package:
   individually: true # During development, consider false for faster builds
-  includeModules: true # Required because node_modules is excluded.
   patterns:
     - '!appsync/**'
     - '!node_modules/**'
@@ -45,26 +44,24 @@ package:
     - '!.git/**'
     - '!tmp/**'
 
+appSync: '${file(./appsync/stack.yml)}'
+
 custom:
   awsResourcePrefix: '${env:AWS_RESOURCE_PRIFIX}-'
   externalId: '${sls:instanceId}'
   webpack:
-    includeModules: true
+    includeModules: true # Required because node_modules is excluded.
     packager: 'npm'
   logLevel: ${env:LOG_LEVEL}
   sns:
     lambdaErrorNotifyTopicName: '${env:LAMBDA_ERROR_NOTIFY_SNS_TOPIC_NAME}'
     errorNotifySubscriptions:
-      - Endpoint: !GetAtt SendSlackMessageLambdaFunction.Arn
-        Protocol: lambda
       - Endpoint: ${env:INCIDENT_ALARM_EMAIL_ADDRESS}
         Protocol: email
   prune:
     automatic: true
     number: 3
-  appSync: '${file(./appsync/stack.yml)}'
   modules:
-    wafforappsync: ${file(./serverless/ap-northeast-1/resources/modules/waf-for-appsync/config.yml)}
     serverlessdeploy: ${file(./serverless/ap-northeast-1/resources/modules/cicd-serverless-deploy/config.yml)}
     dynamodbTablesCloudWatchAlarm: ${file(./serverless/ap-northeast-1/resources/modules/dynamodb-tables-cloud-watch-alarm/config.yml)}
     awsBackup: ${file(./serverless/ap-northeast-1/resources/modules/aws-backup/config.yml)}

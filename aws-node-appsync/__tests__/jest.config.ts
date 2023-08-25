@@ -25,6 +25,10 @@ const config: Config.InitialOptions = {
     '^.+\\.(ts|tsx)$': 'ts-jest',
   },
   watchPathIgnorePatterns: ['<rootDir>/.serverless/', '<rootDir>/dist/', '<rootDir>/node_modules/', '<rootDir>/src/'],
+  rootDir: '../',
+  collectCoverage: false, // 常にカバレッジを取得する場合はtrueにする
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/*.test.ts', '!src/**/*.spec.ts', '!src/types/**/*.ts'],
+  coverageDirectory: '__tests__/coverage',
 };
 
 export default config;

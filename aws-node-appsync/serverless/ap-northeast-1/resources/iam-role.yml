@@ -19,7 +19,7 @@ Resources:
               - Effect: 'Allow'
                 Action:
                   - 'dynamodb:*'
-                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId, "*"}:table/${self:custom.awsResourcePrefix}*'
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${self:custom.awsResourcePrefix}*'
               - Effect: 'Allow'
                 Action:
                   - 'logs:CreateLogGroup'
